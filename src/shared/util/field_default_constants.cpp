@@ -32,98 +32,58 @@
 namespace FieldConstantsRoboCup2014 {
 
 #ifdef STANDARD_DUAL_FIELD
-const std::size_t kNumFieldLines = 12;
+const std::size_t kNumFieldLines = 8;
 const FieldLine kFieldLines[kNumFieldLines] = {
-  FieldLine("TopTouchLine", -4040, 3020, 4040, 3020, 10),
-  FieldLine("BottomTouchLine", -4040, -3020, 4040, -3020, 10),
-  FieldLine("LeftGoalLine", -4040, -3020, -4040, 3020, 10),
-  FieldLine("RightGoalLine", 4040, -3020, 4040, 3020, 10),
-  FieldLine("HalfwayLine", 0, -3020, 0, 3020, 10),
-  FieldLine("CenterLine", -4040, 0, 4040, 0, 10),
-  FieldLine("LeftPenaltyStretch", -3050, -250, -3050, 250, 10),
-  FieldLine("RightPenaltyStretch", 3050, -250, 3050, 250, 10),
-
-  // The following are included for the overlaid single-sized fields at
-  // RoboCup 2014.
-  // Primary Single-Size Field.
-  FieldLine("PrimarySingleSize_LeftPenaltyStretch",
-            -2195, -2230, -1845, -2230, 10),
-  FieldLine("PrimarySingleSize_RightPenaltyStretch",
-            -2195, 2230, -1845, 2230, 10),
-
-  // Secondary Single-Size Field.
-  FieldLine("SecondarySingleSize_LeftPenaltyStretch",
-            2195, -2230, 1845, -2230, 10),
-  FieldLine("SecondarySingleSize_RightPenaltyStretch",
-            2195, 2230, 1845, 2230, 10),
+  FieldLine("TopTouchLine", -3015, 2015, 3015, 2015, 10),
+  FieldLine("BottomTouchLine", -3015, -2015, 3015, -2015, 10),
+  FieldLine("LeftGoalLine", -3015, -2015, -3015, 2015, 10),
+  FieldLine("RightGoalLine", 3015, -2015, 3015, 2015, 10),
+  FieldLine("HalfwayLine", 0, -2015, 0, 2015, 10),
+  FieldLine("CenterLine", -3015, 0, 3015, 0, 10),
+  FieldLine("LeftPenaltyStretch", -2230, -175, -2230, 175, 10),
+  FieldLine("RightPenaltyStretch", 2230, -175, 2230, 175, 10),
 };
 
-const std::size_t kNumFieldArcs = 15;
+const std::size_t kNumFieldArcs = 5;
 const FieldCircularArc kFieldArcs[kNumFieldArcs] = {
   FieldCircularArc("LeftFieldLeftPenaltyArc",
-                   -4045, 250, 995, 0, 0.5 * M_PI, 10),
+                   -3025, 175, 795, 0, 0.5 * M_PI, 10),
   FieldCircularArc("LeftFieldRightPenaltyArc",
-                   -4045, -250, 995, 1.5 * M_PI, 2.0 * M_PI, 10),
+                   -3025, -175, 795, 1.5 * M_PI, 2.0 * M_PI, 10),
   FieldCircularArc("RightFieldLeftPenaltyArc",
-                   4045, -250, 995, M_PI, 1.5 * M_PI, 10),
+                   3025, -175, 795, M_PI, 1.5 * M_PI, 10),
   FieldCircularArc("RightFieldRightPenaltyArc",
-                   4045, 250, 995, 0.5 * M_PI, M_PI, 10),
+                   3025, 175, 795, 0.5 * M_PI, M_PI, 10),
   FieldCircularArc("CenterCircle",
                    0, 0, 495, 0, 2.0 * M_PI, 10),
-
-  // The following are included for the overlaid single-sized fields at
-  // RoboCup 2014.
-  // Primary Single-Size Field.
-  FieldCircularArc("PrimarySingleSize_CenterCircle",
-                   -2020, 0, 495, 0, 2.0 * M_PI, 10),
-  FieldCircularArc("PrimarySingleSize_LeftFieldLeftPenaltyArc",
-                   -2195, -3025, 795, 0.5 * M_PI, M_PI, 10),
-  FieldCircularArc("PrimarySingleSize_LeftFieldRightPenaltyArc",
-                   -1845, -3025, 795, 0.0, 0.5 * M_PI, 10),
-  FieldCircularArc("PrimarySingleSize_RightFieldRightPenaltyArc",
-                   -2195, 3025, 795, M_PI, 1.5 * M_PI, 10),
-  FieldCircularArc("PrimarySingleSize_RightFieldLeftPenaltyArc",
-                   -1845, 3025, 795, 1.5 * M_PI, 2.0 * M_PI, 10),
-
-  // Secondary Single-Size Field.
-  FieldCircularArc("SecondarySingleSize_CenterCircle",
-                   2020, 0, 495, 0, 2.0 * M_PI, 10),
-  FieldCircularArc("SecondarySingleSize_LeftFieldRightPenaltyArc",
-                   2195, -3025, 795, 0.0, 0.5 * M_PI, 10),
-  FieldCircularArc("SecondarySingleSize_LeftFieldLeftPenaltyArc",
-                   1845, -3025, 795, 0.5 * M_PI, M_PI, 10),
-  FieldCircularArc("SecondarySingleSize_RightFieldLeftPenaltyArc",
-                   2195, 3025, 795, 1.5 * M_PI, 2.0 * M_PI, 10),
-  FieldCircularArc("SecondarySingleSize_RightFieldRightPenaltyArc",
-                   1845, 3025, 795, M_PI, 1.5 * M_PI, 10),
 };
 
 const GVector::vector2d<double> kCameraControlPoints[4][4] = {
   {
     GVector::vector2d<double>(0.0, 0.0),
-    GVector::vector2d<double>(0.0, 4045.0),
-    GVector::vector2d<double>(4045.0, 0.0),
+    GVector::vector2d<double>(0.0, 3020.0),
+    GVector::vector2d<double>(3020.0, 0.0),
     GVector::vector2d<double>(0.0, 0.0),
   },
 
   {
-    GVector::vector2d<double>(-4045.0, 0.0),
+    GVector::vector2d<double>(-3020.0, 0.0),
     GVector::vector2d<double>(0.0, 0.0),
     GVector::vector2d<double>(0.0, 3025.0),
-    GVector::vector2d<double>(-4045.0, 3025.0),
+    GVector::vector2d<double>(-3020.0, 3025.0),
   },
 
   {
-    GVector::vector2d<double>(-4045.0, -3025.0),
+    GVector::vector2d<double>(-3020.0, -3025.0),
     GVector::vector2d<double>(0.0, -3025.0),
     GVector::vector2d<double>(0.0, 0.0),
-    GVector::vector2d<double>(-4045.0, 0.0),
+    GVector::vector2d<double>(-3020.0, 0.0),
   },
 
   {
     GVector::vector2d<double>(0.0, -3025.0),
-    GVector::vector2d<double>(4045.0, -3025.0),
-    GVector::vector2d<double>(4045.0, 0.0),
+    GVector::vector2d<double>(3020.0, -3025.0),
+    GVector::vector2d<double>(3020.0, 0.0),
     GVector::vector2d<double>(0.0, 0.0),
   }
 };
