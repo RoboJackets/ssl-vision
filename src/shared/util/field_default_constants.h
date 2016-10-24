@@ -33,7 +33,7 @@ namespace FieldConstantsRoboCup2014 {
 
 const double kFieldLength = 6050.0;
 const double kFieldWidth = 4050.0;
-const double kGoalWidth = 1000.0;
+const double kGoalWidth = 700.0;
 const double kGoalDepth = 200.0;
 const double kBoundaryWidth = 250.0;
 
