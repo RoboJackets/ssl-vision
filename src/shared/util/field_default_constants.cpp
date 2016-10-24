@@ -24,7 +24,7 @@
 #include <math.h>
 #include "field.h"
 
-namespace FieldConstantsRoboCup2014 {
+namespace FieldConstantsRoboCup2012 {
 
 const std::size_t kNumFieldLines = 8;
 const FieldLine kFieldLines[kNumFieldLines] = {
