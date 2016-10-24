@@ -24,10 +24,10 @@
 #include "field.h"
 #include "field_default_constants.h"
 
-using FieldConstantsRoboCup2012::kNumFieldLines;
-using FieldConstantsRoboCup2012::kNumFieldArcs;
-using FieldConstantsRoboCup2012::kFieldLines;
-using FieldConstantsRoboCup2012::kFieldArcs;
+using FieldConstantsRoboCup2014::kNumFieldLines;
+using FieldConstantsRoboCup2014::kNumFieldArcs;
+using FieldConstantsRoboCup2014::kFieldLines;
+using FieldConstantsRoboCup2014::kFieldArcs;
 
 const double GLSoccerView::minZValue = -10;
 const double GLSoccerView::maxZValue = 10;
@@ -40,9 +40,9 @@ const double GLSoccerView::MinRedrawInterval = 0.016; ///Minimum time between gr
 const int GLSoccerView::unknownRobotID = -1;
 
 GLSoccerView::FieldDimensions::FieldDimensions() :
-  field_length(FieldConstantsRoboCup2012::kFieldLength),
-  field_width(FieldConstantsRoboCup2012::kFieldWidth),
-  boundary_width(FieldConstantsRoboCup2012::kBoundaryWidth) {
+  field_length(FieldConstantsRoboCup2014::kFieldLength),
+  field_width(FieldConstantsRoboCup2014::kFieldWidth),
+  boundary_width(FieldConstantsRoboCup2014::kBoundaryWidth) {
   for (size_t i = 0; i < kNumFieldLines; ++i) {
     lines.push_back(new FieldLine(kFieldLines[i]));
   }

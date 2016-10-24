@@ -752,11 +752,11 @@ CameraParameters::AdditionalCalibrationInformation::
     control_point_set[i]->addChild(control_point_image_ys[i]);
     control_point_field_xs[i] = new VarDouble(
         "Control point " + i_str + " field x",
-        FieldConstantsRoboCup2012::kCameraControlPoints[camera_index][i].x);
+        FieldConstantsRoboCup2014::kCameraControlPoints[camera_index][i].x);
     control_point_set[i]->addChild(control_point_field_xs[i]);
     control_point_field_ys[i] = new VarDouble(
         "Control point " + i_str + " field y",
-        FieldConstantsRoboCup2012::kCameraControlPoints[camera_index][i].y);
+        FieldConstantsRoboCup2014::kCameraControlPoints[camera_index][i].y);
     control_point_set[i]->addChild(control_point_field_ys[i]);
   }
 
