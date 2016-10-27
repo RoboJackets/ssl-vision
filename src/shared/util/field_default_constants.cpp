@@ -60,32 +60,19 @@ const FieldCircularArc kFieldArcs[kNumFieldArcs] = {
 
 const GVector::vector2d<double> kCameraControlPoints[4][4] = {
   {
-    GVector::vector2d<double>(0.0, 0.0),
-    GVector::vector2d<double>(0.0, 3020.0),
-    GVector::vector2d<double>(3020.0, 0.0),
-    GVector::vector2d<double>(0.0, 0.0),
+    GVector::vector2d<double>(-3015, 2015),
+    GVector::vector2d<double>(0.0, 2015.0),
+    GVector::vector2d<double>(0.0, -2015.0),
+    GVector::vector2d<double>(-3015.0, -2015.0),
   },
 
   {
-    GVector::vector2d<double>(-3020.0, 0.0),
-    GVector::vector2d<double>(0.0, 0.0),
-    GVector::vector2d<double>(0.0, 3025.0),
-    GVector::vector2d<double>(-3020.0, 3025.0),
+    GVector::vector2d<double>(3015, 2015),
+    GVector::vector2d<double>(0.0, 2015.0),
+    GVector::vector2d<double>(0.0, -2015.0),
+    GVector::vector2d<double>(3015.0, -2015.0),
   },
 
-  {
-    GVector::vector2d<double>(-3020.0, -3025.0),
-    GVector::vector2d<double>(0.0, -3025.0),
-    GVector::vector2d<double>(0.0, 0.0),
-    GVector::vector2d<double>(-3020.0, 0.0),
-  },
-
-  {
-    GVector::vector2d<double>(0.0, -3025.0),
-    GVector::vector2d<double>(3020.0, -3025.0),
-    GVector::vector2d<double>(3020.0, 0.0),
-    GVector::vector2d<double>(0.0, 0.0),
-  }
 };
 
 #else
