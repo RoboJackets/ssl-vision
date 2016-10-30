@@ -127,7 +127,7 @@ bool UDP::open(int port, bool share_port_for_multicasting, bool multicast_includ
     sockname.sin_family = AF_INET;
     sockname.sin_addr.s_addr = htonl(INADDR_ANY);
     sockname.sin_port = htons(port);
-    bind(fd,(struct sockaddr*)(&sockname),sizeof(sockname));
+    //bind(fd,(struct sockaddr*)(&sockname),sizeof(sockname));
   }
 
 
