@@ -12,37 +12,32 @@
 //  Version 3 in the file COPYING that came with this distribution.
 //  If not, see <http://www.gnu.org/licenses/>.
 //========================================================================
-/*!
-  \file    plugin_runlength_encode.h
-  \brief   C++ Interface: plugin_runlength_encode
-  \author  Stefan Zickler, 2008
-*/
-//========================================================================
-#ifndef PLUGIN_RUNLENGTHENCODE_H
-#define PLUGIN_RUNLENGTHENCODE_H
+
+#pragma once
 
 #include <visionplugin.h>
-#include "cmvision_region.h"
-#include "timer.h"
+#include <captureinterface.h>
+#include "image.h"
+#include "plugin_visualize.h"
+#include "capture_splitter.h"
 
-/**
-	@author Stefan Zickler
-*/
-class PluginRunlengthEncode : public VisionPlugin
-{
+class PluginDistribute : public VisionPlugin {
 protected:
-  VarList * settings;
-  VarInt * v_max_runs;
+  VarList *_settings;
+  VarBool *_v_enabled;
+  VarBool *_v_image;
+  VarBool *_v_greyscale;
+
+  std::vector<CaptureSplitter*> captureSplitters;
+
+  void drawCameraImage(FrameData *data, VisualizationFrame *vis_frame);
+
 public:
-    explicit PluginRunlengthEncode(FrameBuffer * _buffer);
+  PluginDistribute(FrameBuffer *_buffer, vector<CaptureSplitter *> captureSplitters);
 
-    ~PluginRunlengthEncode() override;
+  ~PluginDistribute();
 
-    ProcessResult process(FrameData * data, RenderOptions * options) override;
-
-    VarList * getSettings() override;
-
-    string getName() override;
+  virtual ProcessResult process(FrameData *data, RenderOptions *options);
+  virtual VarList *getSettings();
+  virtual string getName();
 };
-
-#endif

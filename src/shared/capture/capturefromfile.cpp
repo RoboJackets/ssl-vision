@@ -30,11 +30,7 @@
 #include <opencv2/opencv.hpp>
 
 
-#ifndef VDATA_NO_QT
 CaptureFromFile::CaptureFromFile(VarList * _settings, int default_camera_id, QObject * parent) : QObject(parent), CaptureInterface(_settings)
-#else
-CaptureFromFile::CaptureFromFile(VarList * _settings) : CaptureInterface(_settings)
-#endif
 {
   currentImageIndex = 0;
   is_capturing=false;
@@ -48,8 +44,8 @@ CaptureFromFile::CaptureFromFile(VarList * _settings) : CaptureInterface(_settin
   v_colorout->addItem(Colors::colorFormatToString(COLOR_YUV422_UYVY));
   v_colorout->addItem(Colors::colorFormatToString(COLOR_RAW8));
 
-  conversion_settings-> addChild(v_raw_width=new VarInt("raw width", 0));
-  conversion_settings-> addChild(v_raw_height=new VarInt("raw height", 0));
+  conversion_settings-> addChild(v_raw_width=new VarInt("raw width", 2448));
+  conversion_settings-> addChild(v_raw_height=new VarInt("raw height", 2048));
 
   //=======================CAPTURE SETTINGS==========================
   ostringstream convert;
@@ -76,20 +72,14 @@ bool CaptureFromFile::stopCapture()
 
 void CaptureFromFile::cleanup()
 {
-#ifndef VDATA_NO_QT
   mutex.lock();
-#endif
   is_capturing=false;
-#ifndef VDATA_NO_QT
   mutex.unlock();
-#endif
 }
 
 bool CaptureFromFile::startCapture()
 {
-#ifndef VDATA_NO_QT
   mutex.lock();
-#endif
   if(images.size() == 0)
   {
     // Acquire a list of file names
@@ -98,9 +88,7 @@ bool CaptureFromFile::startCapture()
     if((v_cap_dir->getString() == "") || ((dp  = opendir(v_cap_dir->getString().c_str())) == 0)) 
     {
       fprintf(stderr,"Failed to open directory %s \n", v_cap_dir->getString().c_str());
-#ifndef VDATA_NO_QT
       mutex.unlock();
-#endif      
       is_capturing=false;
       return false;
     }  
@@ -117,9 +105,7 @@ bool CaptureFromFile::startCapture()
     closedir(dp);
     if(imgs_to_load.size() == 0)
     {
-#ifndef VDATA_NO_QT
       mutex.unlock();
-#endif      
       is_capturing=false;
       return false;
     }
@@ -131,6 +117,11 @@ bool CaptureFromFile::startCapture()
       int height(v_raw_height->get());
       if(getFileExtension(currentImage) == "RAW")
       {
+        if(width <= 0 || height <= 0)
+        {
+          std::cout << "Could not read image. Dimensions must be positive." << std::endl;
+          continue;
+        }
         std::ifstream file(currentImage, std::ios::binary );
         if(!file)
         {
@@ -168,9 +159,7 @@ bool CaptureFromFile::startCapture()
   }
   is_capturing=true;  
   
-#ifndef VDATA_NO_QT
   mutex.unlock();
-#endif
   return true;
 }
 
@@ -204,9 +193,7 @@ bool CaptureFromFile::isImageFileName(const std::string& fileName)
 
 bool CaptureFromFile::copyAndConvertFrame(const RawImage & src, RawImage & target)
 {
-#ifndef VDATA_NO_QT
   mutex.lock();
-#endif
 
   ColorFormat output_fmt = Colors::stringToColorFormat(v_colorout->getSelection().c_str());
   ColorFormat src_fmt = src.getColorFormat();
@@ -224,6 +211,15 @@ bool CaptureFromFile::copyAndConvertFrame(const RawImage & src, RawImage & targe
       cvtColor(srcMat, dstMat, cv::COLOR_BayerRG2BGR);
   }
 #ifndef NO_DC1394_CONVERSIONS
+  else if(src_fmt == COLOR_RAW8 && output_fmt == COLOR_YUV422_UYVY)
+  {
+    // note: this an inefficient double conversion and should only be used for testing!
+    cv::Mat srcMat(src.getHeight(), src.getWidth(), CV_8UC1, src.getData());
+    cv::Mat dstMat(target.getHeight(), target.getWidth(), CV_8UC3);
+    cvtColor(srcMat, dstMat, cv::COLOR_BayerRG2BGR);
+    dc1394_convert_to_YUV422(dstMat.data, target.getData(), src.getWidth(), src.getHeight(),
+                             DC1394_BYTE_ORDER_UYVY, DC1394_COLOR_CODING_RGB8, 8);
+  }
   else if (src_fmt == COLOR_RGB8 && output_fmt == COLOR_YUV422_UYVY)
   {
     if (src.getData() != 0)
@@ -242,22 +238,16 @@ bool CaptureFromFile::copyAndConvertFrame(const RawImage & src, RawImage & targe
     fprintf(stderr,"Cannot copy and convert frame...unknown conversion selected from: %s to %s\n",
             Colors::colorFormatToString(src_fmt).c_str(),
             Colors::colorFormatToString(output_fmt).c_str());
-#ifndef VDATA_NO_QT
     mutex.unlock();
-#endif
     return false;
   }
-#ifndef VDATA_NO_QT
   mutex.unlock();
-#endif
   return true;
 }
 
 RawImage CaptureFromFile::getFrame()
 {
-#ifndef VDATA_NO_QT
    mutex.lock();
-#endif
 
   RawImage result;
   if(images.empty())
@@ -277,20 +267,14 @@ RawImage CaptureFromFile::getFrame()
     result.setTime((double) tv.tv_sec + tv.tv_usec*(1.0E-6));
   }
 
-#ifndef VDATA_NO_QT
   mutex.unlock();
-#endif 
   return result;
 }
 
 void CaptureFromFile::releaseFrame() 
 {
-#ifndef VDATA_NO_QT
   mutex.lock();
-#endif
-#ifndef VDATA_NO_QT
   mutex.unlock();
-#endif
 }
 
 string CaptureFromFile::getCaptureMethodName() const 

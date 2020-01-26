@@ -20,6 +20,9 @@
 //========================================================================
 
 #include "capture_thread.h"
+#include <capture_splitter.h>
+#include <iostream>
+#include <iomanip>
 
 CaptureThread::CaptureThread(int cam_id)
 {
@@ -32,14 +35,14 @@ CaptureThread::CaptureThread(int cam_id)
   control->addChild( (VarType*) (c_stop   = new VarTrigger("stop capture","Stop")));
   control->addChild( (VarType*) (c_reset  = new VarTrigger("reset bus","Reset")));
   control->addChild( (VarType*) (c_auto_refresh= new VarBool("auto refresh params",true)));
+  // timings should only be printed on demand for a short period of time by temporally activating this flag
+  control->addChild( (VarType*) (c_print_timings = new VarBool("print timings",false)));
   control->addChild( (VarType*) (c_refresh= new VarTrigger("re-read params","Refresh")));
   control->addChild( (VarType*) (captureModule= new VarStringEnum("Capture Module","None")));
   captureModule->addFlags(VARTYPE_FLAG_NOLOAD_ENUM_CHILDREN);
   captureModule->addItem("None");
-  captureModule->addItem("Video 4 Linux");
   captureModule->addItem("Read from files");
   captureModule->addItem("Generator");
-  settings->addChild( (VarType*) (v4l = new VarList("Video 4 Linux")));
   settings->addChild( (VarType*) (fromfile = new VarList("Read from files")));
   settings->addChild( (VarType*) (generator = new VarList("Generator")));
   settings->addFlags( VARTYPE_FLAG_AUTO_EXPAND_TREE );
@@ -55,36 +58,61 @@ CaptureThread::CaptureThread(int cam_id)
   capture=nullptr;
   captureFiles = new CaptureFromFile(fromfile, camId);
   captureGenerator = new CaptureGenerator(generator);
-  captureV4L = new CaptureV4L(v4l,camId);
 
 #ifdef DC1394
   captureModule->addItem("DC 1394");
-  settings->addChild( (VarType*) (dc1394 = new VarList("DC1394")));
-  captureDC1394 = new CaptureDC1394v2(dc1394,camId);
+  dc1394 = new VarList("DC1394");
+  settings->addChild(dc1394);
+  captureDC1394 = new CaptureDC1394v2(dc1394, camId);
+#endif
+
+#ifdef V4L
+  captureModule->addItem("Video 4 Linux");
+  v4l = new VarList("Video 4 Linux");
+  settings->addChild(v4l);
+  captureV4L = new CaptureV4L(v4l, camId);
 #endif
 
 #ifdef PYLON5
   captureModule->addItem("Basler GigE");
-  settings->addChild( (VarType*) (basler = new VarList("Basler GigE")));
+  basler = new VarList("Basler GigE");
+  settings->addChild(basler);
   captureBasler = new CaptureBasler(basler);
 #endif
 
 #ifdef FLYCAP
+  flycap = new VarList("Flycapture");
   captureModule->addItem("Flycapture");
-  settings->addChild( (VarType*) (flycap = new VarList("Flycapture")));
+  settings->addChild(flycap);
   captureFlycap = new CaptureFlycap(flycap, camId);
 #endif
 
 #ifdef MVIMPACT2
   captureModule->addItem("BlueFox2");
-  settings->addChild( (VarType*) (bluefox2 = new VarList("BlueFox2")));
-  captureBlueFox2 = new CaptureBlueFox2(bluefox2,camId);
+  bluefox2 = new VarList("BlueFox2");
+  settings->addChild(bluefox2);
+  captureBlueFox2 = new CaptureBlueFox2(bluefox2, camId);
 #endif
 
 #ifdef MVIMPACT3
   captureModule->addItem("BlueFox3");
-  settings->addChild( (VarType*) (bluefox3 = new VarList("BlueFox3")));
-  captureBlueFox3 = new CaptureBlueFox3(bluefox3,camId);
+  bluefox3 = new VarList("BlueFox3");
+  settings->addChild(bluefox3);
+  captureBlueFox3 = new CaptureBlueFox3(bluefox3, camId);
+#endif
+
+#ifdef SPINNAKER
+  captureModule->addItem("Spinnaker");
+  spinnaker = new VarList("Spinnaker");
+  settings->addChild(spinnaker);
+  captureSpinnaker = new CaptureSpinnaker(spinnaker, camId);
+#endif
+
+#ifdef CAMERA_SPLITTER
+  splitter = new VarList("Splitter");
+  captureModule->addItem("Splitter");
+  settings->addChild(splitter);
+  captureSplitter = new CaptureSplitter(splitter, camId);
 #endif
 
   selectCaptureMethod();
@@ -108,13 +136,17 @@ VarList * CaptureThread::getSettings() {
 
 CaptureThread::~CaptureThread()
 {
-#ifdef DC1394
-  delete captureDC1394;
-#endif
-  delete captureV4L;
   delete captureFiles;
   delete captureGenerator;
   delete counter;
+
+#ifdef DC1394
+  delete captureDC1394;
+#endif
+
+#ifdef V4L
+  delete captureV4L;
+#endif
 
 #ifdef PYLON5
   delete captureBasler;
@@ -130,6 +162,14 @@ CaptureThread::~CaptureThread()
 
 #ifdef MVIMPACT3
   delete captureBlueFox3;
+#endif
+
+#ifdef SPINNAKER
+  delete captureSpinnaker;
+#endif
+
+#ifdef CAMERA_SPLITTER
+  delete captureSplitter;
 #endif
 }
 
@@ -153,29 +193,48 @@ void CaptureThread::selectCaptureMethod() {
     new_capture = captureFiles;
   } else if(captureModule->getString() == "Generator") {
     new_capture = captureGenerator;
-#ifdef MVIMPACT2
-  } else if(captureModule->getString() == "BlueFox2") {
-    new_capture = captureBlueFox2;
-#endif
-#ifdef MVIMPACT3
-    } else if(captureModule->getString() == "BlueFox3") {
-    new_capture = captureBlueFox3;
-#endif
-  } else if(captureModule->getString() == "Video 4 Linux") {
-    new_capture = captureV4L;
+  }
 #ifdef DC1394
-  } else if(captureModule->getString() == "DC 1394") {
+  else if(captureModule->getString() == "DC 1394") {
     new_capture = captureDC1394;
+  }
+#endif
+#ifdef V4L
+  else if(captureModule->getString() == "Video 4 Linux") {
+    new_capture = captureV4L;
+  }
 #endif
 #ifdef FLYCAP
-  } else if(captureModule->getString() == "Flycapture") {
+  else if(captureModule->getString() == "Flycapture") {
     new_capture = captureFlycap;
+  }
 #endif
 #ifdef PYLON5
-  } else if (captureModule->getString() == "Basler GigE") {
-	  new_capture = captureBasler;
-#endif
+  else if (captureModule->getString() == "Basler GigE") {
+    new_capture = captureBasler;
   }
+#endif
+#ifdef MVIMPACT2
+  else if(captureModule->getString() == "BlueFox2") {
+    new_capture = captureBlueFox2;
+  }
+#endif
+#ifdef MVIMPACT3
+  else if(captureModule->getString() == "BlueFox3") {
+    new_capture = captureBlueFox3;
+  }
+#endif
+#ifdef SPINNAKER
+  else if(captureModule->getString() == "Spinnaker") {
+    new_capture = captureSpinnaker;
+  }
+#endif
+#ifdef CAMERA_SPLITTER
+  else if(captureModule->getString() == "Splitter") {
+    new_capture = captureSplitter;
+  }
+#endif
+
   if (old_capture!=nullptr && new_capture!=old_capture && old_capture->isCapturing()) {
     capture_mutex.unlock();
     stop();
@@ -251,9 +310,12 @@ void CaptureThread::run() {
         }
         capture_mutex.lock();
         if ((capture != nullptr) && (capture->isCapturing())) {
+          auto t_start = std::chrono::steady_clock::now();
           RawImage pic_raw=capture->getFrame();
+          auto t_getFrame = std::chrono::steady_clock::now();
           d->time=pic_raw.getTime();
           bool bSuccess = capture->copyAndConvertFrame( pic_raw,d->video);
+          auto t_convert = std::chrono::steady_clock::now();
           capture_mutex.unlock();
 
           if (bSuccess) {           //only on a good frame read do we proceed
@@ -269,6 +331,23 @@ void CaptureThread::run() {
               stack_mutex.unlock();
               rb->nextWrite(true);
 
+            auto t_process = std::chrono::steady_clock::now();
+
+              if(c_print_timings->getBool())
+              {
+                auto getFrame_duration = std::chrono::duration_cast<std::chrono::microseconds>(t_getFrame - t_start);
+                std::cout << std::setw(13) << std::left << "getFrame"
+                          << std::setw(5) << std::right << getFrame_duration.count() << " μs" << std::endl;
+                auto convert_duration = std::chrono::duration_cast<std::chrono::microseconds>(t_convert - t_getFrame);
+                std::cout << std::setw(13) << std::left << "copy&convert"
+                          << std::setw(5) << std::right << convert_duration.count() << " μs" << std::endl;
+                auto process_duration = std::chrono::duration_cast<std::chrono::microseconds>(t_process - t_convert);
+                std::cout << std::setw(13) << std::left << "process"
+                          << std::setw(5) << std::right << process_duration.count() << " μs" << std::endl;
+                auto total_duration = std::chrono::duration_cast<std::chrono::microseconds>(t_process - t_start);
+                std::cout << std::setw(13) << std::left << "total"
+                          << std::setw(5) << std::right << total_duration.count() << " μs" << std::endl << std::endl;
+              }
 
               if (changed) {
                 if (c_auto_refresh->getBool()==true) {
@@ -280,12 +359,13 @@ void CaptureThread::run() {
                 stack->updateTimingStatistics();
                 stack_mutex.unlock();
               }
-              capture_mutex.lock();
-              if ((capture != nullptr) && (capture->isCapturing())) {
-                capture->releaseFrame();
-              }
-              capture_mutex.unlock();
           }
+
+          capture_mutex.lock();
+          if ((capture != nullptr) && (capture->isCapturing())) {
+            capture->releaseFrame();
+          }
+          capture_mutex.unlock();
         } else {
           stats->total=d->number=counter->getTotal();
           stats->fps_capture=counter->getFPS(changed);

@@ -13,36 +13,44 @@
 //  If not, see <http://www.gnu.org/licenses/>.
 //========================================================================
 /*!
-  \file    plugin_runlength_encode.h
-  \brief   C++ Interface: plugin_runlength_encode
-  \author  Stefan Zickler, 2008
+  \file    initial_color_calibrator.h
+  \brief   C++ Interface: InitialColorCalibrator
+  \author  Mark Geiger <MarkGeiger@posteo.de>, (C) 2017
 */
 //========================================================================
-#ifndef PLUGIN_RUNLENGTHENCODE_H
-#define PLUGIN_RUNLENGTHENCODE_H
+#ifndef INITIAL_COLOR_CALIBRATOR_H
+#define INITIAL_COLOR_CALIBRATOR_H
 
-#include <visionplugin.h>
-#include "cmvision_region.h"
-#include "timer.h"
+#include "colors.h"
 
-/**
-	@author Stefan Zickler
-*/
-class PluginRunlengthEncode : public VisionPlugin
-{
-protected:
-  VarList * settings;
-  VarInt * v_max_runs;
+class ColorClazz {
 public:
-    explicit PluginRunlengthEncode(FrameBuffer * _buffer);
+    ColorClazz(
+            const yuv &initColor,
+            int clazz,
+            float weight,
+            float maxDistance,
+            float maxAngle);
 
-    ~PluginRunlengthEncode() override;
-
-    ProcessResult process(FrameData * data, RenderOptions * options) override;
-
-    VarList * getSettings() override;
-
-    string getName() override;
+    yuv color_yuv;
+    int clazz;
+    float weight;
+    float maxDistance;
+    float maxAngle;
 };
 
-#endif
+class InitialColorCalibrator {
+
+public:
+    InitialColorCalibrator() = default;
+
+    ~InitialColorCalibrator() = default;
+
+    void process(const std::vector<ColorClazz> &calibration_points, YUVLUT *global_lut);
+
+private:
+    float ratedYuvColorDist(const yuv &c1, const ColorClazz &colorClazz);
+};
+
+
+#endif //INITIAL_COLOR_CALIBRATOR_H

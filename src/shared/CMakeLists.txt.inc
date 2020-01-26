@@ -13,7 +13,6 @@ include_directories(${shared_dir}/vartypes/gui)
 include_directories(${shared_dir}/vartypes/xml)
 
 set (SHARED_SRCS
-	${shared_dir}/capture/capturev4l.cpp
 	${shared_dir}/capture/capturefromfile.cpp
 	${shared_dir}/capture/capture_generator.cpp
 	${shared_dir}/capture/captureinterface.cpp
@@ -46,6 +45,7 @@ set (SHARED_SRCS
 	${shared_dir}/util/ringbuffer.cpp
 	${shared_dir}/util/texture.cpp
   ${shared_dir}/util/framelimiter.cpp
+	${shared_dir}/util/initial_color_calibrator.cpp
 
 	${shared_dir}/vartypes/VarBase64.cpp
 	${shared_dir}/vartypes/VarNotifier.cpp
@@ -98,7 +98,6 @@ set (SHARED_SRCS
 
 #only ones that need to be moc'ed
 set (SHARED_HEADERS
-	${shared_dir}/capture/capturev4l.h
 	${shared_dir}/capture/capturefromfile.h
   ${shared_dir}/capture/capture_generator.h
 
