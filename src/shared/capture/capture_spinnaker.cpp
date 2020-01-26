@@ -156,7 +156,7 @@ void CaptureSpinnaker::readParameterValues(VarList * item)
     }
 
     v_frame_rate->setDouble(pCam->AcquisitionFrameRate.GetValue());
-    v_frame_rate_result->setDouble(pCam->AcquisitionResultingFrameRate.GetValue());
+    //v_frame_rate_result->setDouble(pCam->AcquisitionResultingFrameRate.GetValue());
   }
   catch (Spinnaker::Exception &e)
   {
@@ -309,7 +309,7 @@ bool CaptureSpinnaker::startCapture()
     if(out_color == COLOR_RAW8)
     {
       try {
-        pCam->PixelFormat.SetValue(Spinnaker::PixelFormat_BayerRG8);
+        pCam->PixelFormat.SetValue(Spinnaker::PixelFormat_BayerBG8);
       }
       catch (Spinnaker::Exception &e)
       {
@@ -349,6 +349,13 @@ bool CaptureSpinnaker::startCapture()
 bool CaptureSpinnaker::copyAndConvertFrame(const RawImage & src, RawImage & target)
 {
   mutex.lock();
+
+  if (src.getNumBytes() == 0) {
+    fprintf(stderr, "The UDP is dead, but the fail whale is dead too :(\r\n");
+    mutex.unlock();
+    return false;
+  }
+
   target.setTime(src.getTime());
 
   ColorFormat src_color = Colors::stringToColorFormat(v_capture_mode->getSelection().c_str());
@@ -359,7 +366,8 @@ bool CaptureSpinnaker::copyAndConvertFrame(const RawImage & src, RawImage & targ
     target.ensure_allocation(out_color, src.getWidth(), src.getHeight());
     cv::Mat srcMat(src.getHeight(), src.getWidth(), CV_8UC1, src.getData());
     cv::Mat dstMat(target.getHeight(), target.getWidth(), CV_8UC3, target.getData());
-    cvtColor(srcMat, dstMat, cv::COLOR_BayerBG2RGB);
+    //cvtColor(srcMat, dstMat, cv::COLOR_BayerBG2RGB);
+    cvtColor(srcMat, dstMat, cv::COLOR_BayerBG2BGR);
   } else {
     fprintf(stderr, "Invalid conversion from %s to %s\n",
             v_capture_mode->getSelection().c_str(), v_convert_to_mode->getSelection().c_str());
